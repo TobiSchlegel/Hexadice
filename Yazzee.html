@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Yazzee</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+*{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;font:700 17px/1.3 "Comic Neue","Chalkboard SE","Comic Sans MS","Segoe Print",system-ui,sans-serif;color:#2b2118;min-height:100vh;
+background:
+repeating-linear-gradient(90deg,transparent 0 219px,rgba(30,12,0,.55) 219px 221px,transparent 221px 222px),
+url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='660' height='660'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.1' numOctaves='5' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .1 0 0 0 0 .03 0 0 0 -1.6 1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%23a56d3a'/%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");}
+.wrap{display:flex;gap:18px;max-width:1000px;margin:0 auto;padding:14px;align-items:flex-start}
+h1{margin:0 0 8px;font-size:36px;letter-spacing:3px;text-align:center}
+.sheet{flex:1;min-width:0;background:linear-gradient(#fcf8ea,#f4edd3);padding:12px 14px;border-radius:3px;box-shadow:0 8px 24px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.15)}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #b9ad8d;padding:5px 8px;text-align:center;height:37px;font-size:18px}
+td:not(:first-child){color:#14315c;font-size:22px}
+td:first-child{text-align:left;white-space:nowrap}
+th{background:#e9dfbd;font-size:20px}
+th.on{background:#f5c542}
+tr.sum td{background:#efe6c6;font-weight:600}
+tr.tot td{background:#d9c98f;font-size:24px}
+td.cat{cursor:pointer}
+td.cur{background:rgba(245,197,66,.18)}
+td.sel{background:#f5c542!important;outline:2px solid #b8860b;outline-offset:-2px}
+.pv{color:#9a7a1c;font-weight:400}
+.tray{width:236px;position:sticky;top:12px;padding:12px;border-radius:14px;color:#fff;
+background:radial-gradient(#1f7a4a,#0f4a2c);border:10px solid #4a2a12;box-shadow:0 8px 24px rgba(0,0,0,.6),inset 0 0 30px rgba(0,0,0,.5)}
+.st{text-align:center;font-size:20px;margin-bottom:8px;min-height:46px}
+.mu{position:absolute;top:2px;right:4px;background:none;border:0;font-size:22px;cursor:pointer}
+.toast{position:fixed;left:50%;top:18%;transform:translateX(-50%);background:#f5c542;color:#2b2118;padding:14px 26px;border-radius:14px;font-size:32px;box-shadow:0 6px 24px #000;z-index:30;pointer-events:none;white-space:nowrap}
+.st small{display:block;font-weight:400;opacity:.85}
+.dice{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 14px;justify-items:center}
+.die{width:100%;max-width:58px;aspect-ratio:1;border:0;padding:8%;border-radius:12px;background:linear-gradient(145deg,#fff,#d6d6d6);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);box-shadow:0 3px 6px rgba(0,0,0,.5);cursor:pointer;transition:transform .15s}
+.die.z{opacity:.35}
+.pip{place-self:center;width:78%;aspect-ratio:1;border-radius:50%}
+.pip.on{background:#1b1b1b}
+.die.hold{transform:translateY(-7px);box-shadow:0 0 0 3px #f5c542,0 0 16px #f5c542}
+.die.roll{animation:sh .15s infinite}
+@keyframes sh{0%{transform:rotate(-14deg) translateY(-3px)}50%{transform:rotate(14deg) translateY(3px)}100%{transform:rotate(-14deg) translateY(-3px)}}
+button.b{width:100%;padding:11px;margin-top:6px;border:0;border-radius:9px;font-size:18px;font-weight:700;font-family:inherit;color:#2b2118;background:#f5c542;cursor:pointer;box-shadow:0 2px 0 #9a7410}
+button.b:disabled{opacity:.45;cursor:default}
+button.b.g{background:#e7e0c8;box-shadow:0 2px 0 #8c8467}
+.hint{font-size:14px;opacity:.9;text-align:center;margin-top:8px}
+.ov{position:fixed;inset:0;background:rgba(20,8,0,.72);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.ov .box{background:#fcf8ea;border-radius:10px;padding:22px;max-width:340px;width:100%;text-align:center;box-shadow:0 10px 40px #000}
+.ov button{display:block;width:100%;margin-top:10px;padding:13px;border:0;border-radius:9px;background:#8a4b1c;color:#fff;font-size:19px;font-weight:700;font-family:inherit;cursor:pointer}
+.ov li{list-style:none;padding:4px 0;font-size:20px}
+.ov input{width:100%;margin-top:10px;padding:11px;border:2px solid #b9ad8d;border-radius:9px;font:700 20px "Comic Neue","Comic Sans MS",sans-serif;text-align:center}
+.ov button.s{background:#d8cfae;color:#2b2118}
+@media(max-width:760px){
+ .wrap{flex-direction:column;padding:8px 8px 0;gap:0}
+ .sheet{width:100%;padding:8px}
+ td,th{padding:3px 3px;font-size:15px;height:32px}
+ .sheet td:not(:first-child){font-size:19px}
+ .sheet td:first-child{white-space:normal;line-height:1.1}
+ .sheet tr.tot td:not(:first-child){font-size:22px}
+ h1{font-size:28px}
+ .tray{position:sticky;bottom:0;width:100%;order:2;margin:10px 0 0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));border-width:6px;border-radius:14px 14px 0 0}
+ .dice{grid-template-columns:repeat(6,1fr);gap:6px;margin:6px 0 8px}
+ .hint{display:none}
+ .st{min-height:0;margin-bottom:2px}
+ .row2{display:flex;gap:8px}.row2 .b{margin-top:0}
+}
+</style></head><body>
+<div class="wrap">
+ <div class="sheet"><h1>Yazzee</h1><table id="t"></table></div>
+ <div class="tray">
+  <button class="mu" id="mu" aria-label="Ton an/aus">🔊</button>
+  <div class="st" id="st"></div>
+  <div class="dice" id="dice"></div>
+  <div class="row2"><button class="b" id="roll"></button><button class="b g" id="ok"></button></div>
+  <div class="hint">Würfel antippen = behalten · danach Feld auf dem Blatt antippen, nochmal tippen = eintragen</div>
+ </div>
+</div>
+<div class="ov" id="ov"></div>
+<script>
+const N=['Einer','Zweier','Dreier','Vierer','Fünfer','Sechser','Ein Paar','Zwei Paar','Drei Paar','1 Drilling','2 Drilling','Kl. Straße (15 Pkt.)','Gr. Straße (20 Pkt.)','Königsstraße (25 Pkt.)','Haus','Full Haus','4-ling','5-ling','Yazzee (6 gleiche)'];
+const PAR=[3,6,9,12,15,18,10,16,14,12,13,9,10,8,15,14,12,12,10];
+const PIPS={0:[],1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const rnd=()=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%6+1};
+let G,AC=null,muted=false;
+function ac(){try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume()}catch(e){}return AC}
+function noise(t,dur,freq,q,vol){const a=ac();if(!a||muted)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='bandpass';f.frequency.value=freq;f.Q.value=q;const g=a.createGain();g.gain.value=vol;s.connect(f);f.connect(g);g.connect(a.destination);s.start(a.currentTime+t)}
+function tone(f,t,d,v){const a=ac();if(!a||muted)return;const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(v||.15,a.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+d);o.connect(g);g.connect(a.destination);o.start(a.currentTime+t);o.stop(a.currentTime+t+d)}
+function sndRoll(){for(let i=0;i<10;i++)noise(i*.045+Math.random()*.02,.06,1200+Math.random()*2800,3,.8);tone(180,0,.08,.12)}
+function sndClap(sec){for(let i=0;i<sec*22;i++)noise(Math.random()*sec,.1,1400+Math.random()*2800,.8,.4)}
+function fan(){[523,659,784,1047].forEach((f,i)=>tone(f,i*.14,.3,.2))}
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+
+function score(i,d){
+ const c=[0,0,0,0,0,0,0];d.forEach(v=>c[v]++);
+ const vs=n=>[6,5,4,3,2,1].filter(v=>c[v]>=n),sum=d.reduce((a,b)=>a+b,0);
+ if(i<6)return(i+1)*c[i+1];
+ let v,b=0;
+ switch(i){
+  case 6:v=vs(2);return v.length?2*v[0]:0;
+  case 7:v=vs(2);return v.length>1?2*(v[0]+v[1]):0;
+  case 8:v=vs(2);return v.length>2?sum:0;
+  case 9:v=vs(3);return v.length?3*v[0]:0;
+  case 10:v=vs(3);return v.length>1?3*(v[0]+v[1]):0;
+  case 11:return[1,2,3,4,5].every(x=>c[x])?15:0;
+  case 12:return[2,3,4,5,6].every(x=>c[x])?20:0;
+  case 13:return c.slice(1).every(x=>x)?25:0;
+  case 14:for(const t of vs(3))for(const p of vs(2))if(p!=t)b=Math.max(b,3*t+2*p);return b;
+  case 15:for(const t of vs(4))for(const p of vs(2))if(p!=t)b=Math.max(b,4*t+2*p);return b;
+  case 16:v=vs(4);return v.length?4*v[0]:0;
+  case 17:v=vs(5);return v.length?5*v[0]:0;
+  default:v=vs(6);return v.length?6*v[0]:0;
+ }
+}
+function tot(p){
+ const s=(a,b)=>p.sc.slice(a,b).reduce((x,y)=>x+(y||0),0);
+ const up=s(0,6),bo=up>62?50:0,lo=s(6,19),ex=p.sc[18]>0?50:0;
+ return{up,bo,lo,ex,all:lo+up+bo+ex};
+}
+const rolled=()=>G.left<3;
+const cp=()=>G.P[G.cur];
+const isHuman=()=>!cp().cpu;
+
+function render(){
+ const P=G.P,T=P.map(tot);
+ let h='<tr><th></th>'+P.map((p,k)=>`<th class="${k==G.cur?'on':''}">${p.name}</th>`).join('')+'</tr>';
+ const cat=i=>`<tr><td>${N[i]}</td>`+P.map((p,k)=>{
+  const v=p.sc[i];let t='',cl='';
+  if(v!=null)t=v;
+  else if(k==G.cur&&isHuman()&&rolled()&&!G.over){t=`<span class="pv">${score(i,G.dice)}</span>`;cl='cat';if(G.sel==i)cl+=' sel'}
+  if(k==G.cur)cl+=' cur';
+  return`<td class="${cl}" data-i="${i}" data-p="${k}">${t}</td>`}).join('')+'</tr>';
+ const sr=(l,f,c)=>`<tr class="${c||'sum'}"><td>${l}</td>`+T.map(t=>`<td>${f(t)}</td>`).join('')+'</tr>';
+ for(let i=0;i<6;i++)h+=cat(i);
+ h+=sr('63 Punkte',t=>t.up)+sr('+50',t=>t.bo);
+ for(let i=6;i<19;i++)h+=cat(i);
+ h+=sr('Summe 1',t=>t.lo)+sr('Summe 2',t=>t.up)+sr('+50',t=>t.bo)+sr('Yazzee (50 extra Pkt.)',t=>t.ex)+sr('Gesamt',t=>t.all,'tot');
+ $('t').innerHTML=h;
+ $('dice').innerHTML=G.dice.map((v,k)=>`<button class="die ${v?'':'z'} ${G.held[k]?'hold':''} ${G.rolling&&!G.held[k]?'roll':''}" data-k="${k}" aria-label="Würfel ${k+1}">`+[...Array(9)].map((_,j)=>`<span class="pip ${PIPS[v].includes(j)?'on':''}"></span>`).join('')+'</button>').join('');
+ const me=isHuman()&&!G.busy&&!G.over;
+ $('st').innerHTML=`${cp().name} ist dran<small>Wurf ${3-G.left}/3${G.left==0?' – bitte Feld wählen':''}</small>`;
+ $('roll').textContent=`Würfeln (${G.left})`;
+ $('roll').disabled=!(me&&G.left>0);
+ $('ok').textContent=G.sel!=null?`Eintragen: ${N[G.sel].split(' (')[0]} (${score(G.sel,G.dice)})`:'Feld wählen';
+ $('ok').disabled=!(me&&G.sel!=null);
+}
+
+async function rollDice(){
+ G.rolling=true;G.sel=null;sndRoll();render();await sleep(450);
+ G.dice=G.dice.map((v,k)=>G.held[k]?v:rnd());
+ G.left--;G.rolling=false;render();
+}
+async function humanRoll(){
+ if(G.busy||G.left<1||!isHuman())return;
+ G.busy=true;await rollDice();G.busy=false;render();
+}
+function commit(i){
+ const p=cp();p.sc[i]=score(i,G.dice);tone(392,0,.12);
+ if(i==18&&p.sc[i]>0){sndClap(3.5);fan();toast('🎉 YAZZEE! +50')}
+ if(G.P.every(q=>q.sc.every(x=>x!=null)))return finish();
+ G.cur=(G.cur+1)%G.P.length;
+ G.left=3;G.dice=Array(6).fill(0);G.held=Array(6).fill(false);G.sel=null;G.busy=false;
+ render();
+ if(cp().cpu)cpuTurn();
+}
+function finish(){
+ G.over=true;G.sel=null;G.dice=Array(6).fill(0);render();sndClap(5);fan();
+ const r=G.P.map(p=>({n:p.name,s:tot(p).all})).sort((a,b)=>b.s-a.s);
+ const tie=r.length>1&&r[0].s==r[1].s;
+ $('ov').style.display='flex';
+ $('ov').innerHTML=`<div class="box"><h2 style="margin:0 0 8px">${tie?'Unentschieden!':'🏆 '+r[0].n+' gewinnt!'}</h2><ul style="padding:0">${r.map(x=>`<li><b>${x.n}</b>: ${x.s} Punkte</li>`).join('')}</ul><button onclick="menu()">Neues Spiel</button></div>`;
+}
+async function cpuTurn(){
+ G.busy=true;render();await sleep(700);
+ const open=()=>[...Array(19).keys()].filter(i=>cp().sc[i]==null);
+ const gain=d=>Math.max(...open().map(i=>score(i,d)-PAR[i]));
+ await rollDice();
+ while(G.left>0){
+  let bm=63,bv=gain(G.dice);
+  for(let m=0;m<63;m++){
+   let s=0;
+   for(let n=0;n<30;n++)s+=gain(G.dice.map((x,k)=>(m>>k&1)?x:rnd()));
+   if(s/30>bv+0.01){bv=s/30;bm=m}
+  }
+  if(bm==63)break;
+  G.held=G.dice.map((_,k)=>!!(bm>>k&1));render();await sleep(900);
+  await rollDice();
+ }
+ let bi=open()[0],bg=-1e9;
+ for(const i of open()){const g=score(i,G.dice)-PAR[i]+Math.random()*.1;if(g>bg){bg=g;bi=i}}
+ G.sel=bi;render();await sleep(1000);
+ commit(bi);
+}
+function start(n,cpu){
+ const k=cpu?1:n,nm=Array.from({length:k},(_,i)=>(($('nm'+i)||{}).value||'').trim().slice(0,14).replace(/[&<>"]/g,'')||'Spieler '+(i+1));
+ const names=cpu?[nm[0],'CPU']:nm;ac();
+ G={P:names.map((nm,i)=>({name:nm,cpu:cpu&&i==1,sc:Array(19).fill(null)})),cur:0,left:3,dice:Array(6).fill(0),held:Array(6).fill(false),sel:null,busy:false,rolling:false,over:false};
+ $('ov').style.display='none';render();
+}
+function pick(n,cpu){
+ const k=cpu?1:n;
+ $('ov').innerHTML=`<div class="box"><h2 style="margin:0">Wie heißt ihr?</h2>${Array.from({length:k},(_,i)=>`<input id="nm${i}" maxlength="14" placeholder="Spieler ${i+1}" autocomplete="off">`).join('')}<button onclick="start(${n},${cpu})">Los geht’s!</button><button class="s" onclick="menu()">Zurück</button></div>`;
+ ac();const f=$('nm0');if(f)f.focus();
+}
+function menu(){
+ $('ov').style.display='flex';
+ $('ov').innerHTML=`<div class="box"><h2 style="margin:0">🎲 Yazzee</h2><p>Wie viele spielen mit?</p>
+ <button onclick="pick(2,true)">1 Mensch gegen CPU</button>
+ <button onclick="pick(2,false)">2 Menschen</button>
+ <button onclick="pick(3,false)">3 Menschen</button></div>`;
+ G=G||{P:[{name:'Spieler 1',sc:Array(19).fill(null)}],cur:0,left:3,dice:Array(6).fill(0),held:Array(6).fill(false)};
+ render();
+}
+$('dice').addEventListener('click',e=>{
+ const b=e.target.closest('.die');if(!b||G.busy||G.over||!isHuman()||!rolled()||G.left<1)return;
+ const k=+b.dataset.k;G.held[k]=!G.held[k];tone(520,0,.06);render();
+});
+$('t').addEventListener('click',e=>{
+ const td=e.target.closest('td.cat');if(!td||G.busy||!isHuman()||+td.dataset.p!=G.cur)return;
+ const i=+td.dataset.i;
+ if(G.sel==i)commit(i);else{G.sel=i;render()}
+});
+$('roll').onclick=humanRoll;
+$('mu').onclick=()=>{muted=!muted;$('mu').textContent=muted?'🔇':'🔊'};
+$('ok').onclick=()=>{if(G.sel!=null&&!G.busy)commit(G.sel)};
+menu();
+</script></body></html>
